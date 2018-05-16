@@ -10,15 +10,9 @@ Here are some useful links about this subject:
 * <http://us.metamath.org/>
 * <http://www.cs.miami.edu/~tptp/>
 
-LexGenerator will read a text file that uses regular expressions (RE) to define tokens.
-The RE will be converted into a Nondeterministic Finite Automaton (NFA).
-The NFA will be converted into a Deterministic Finite Automaton (DFA).
-This DFA can be stored as a binary lookup table.
-This binary file can be used by a stand alone Lexer to convert a text file to a list of tokens.
-
-RE :arrow_right: NFA :arrow_right: DFA :arrow_right: Binary lookup table stored in a file :arrow_right: Lexer
-
-Text file :arrow_right: Lexer with table that specifies how to scan the file :arrow_right: List of tokens
+Parser is not finished but it works. Better error handling should be implemented. The bootstrapper was implemented first. This was used to generate two files **Parser_Bootstrap.cpp** and **Parser_Bootstrap.h**.
+These files was then used for lexing and parsing the text file **DefaultCFG.txt** to generate **Parser_DefaultCFG.cpp" and **Parser_DefaultCFG.h**. They are equal to the other two files as they should be.
+The text file is meant to represent what was done during the bootstrap. The files **Parser.cpp** and **Parser.h** is meant to be used stand alone together with the generated files with lookup tables.
 
 So far the following are finished:
 * Main.cpp - Just to start the code.
