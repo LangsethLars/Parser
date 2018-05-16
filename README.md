@@ -21,3 +21,5 @@ The project is created in Visual Studio 2017. Most windows specific things has b
   Contains information about the version of Visual C++ that generated the file, and information about the platforms, configurations, and project features selected with the Application Wizard.
 * Parser.vcxproj.filters - 
   Contains information about the association between the files in the project and the filters. This association is used in the IDE to show grouping of files with similar extensions under a specific node (for e.g. ".cpp" files are associated with the "Source Files" filter).
+
+PS: Remember to change Project-->Properties so the program runs in the **Test** folder.
