@@ -1,0 +1,16 @@
+/*
+!/.gitignore
+!/README.md
+
+!/Parser.sln
+!/Parser.vcxproj
+!/Parser.vcxproj.filters
+
+!/*.cpp
+!/*.h
+
+!/src
+!/src/*
+
+!/Test
+!/Test/*

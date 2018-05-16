@@ -1,0 +1,151 @@
+# The alphabet
+# ============
+
+# The alphabet is the full range of a byte, value 0 to 255.
+#
+# The hard coded language elements are in a subset of ASCII (just for simplicity):
+# [\09\0A\0D\20\21-\7E] tab, lf, cr, space and visible ASCII characters.
+#
+# Comments and text strings can contain Latin-n or UTF8 (this file can not start with BOM, 0xEF 0xBB 0xBF).
+
+# UTF8
+# ====
+# Bits Bytes Byte 1    Byte 2    Byte 3    Byte 4
+#   7    1   0xxxxxxx                                ASCII
+#  11    2   110xxxxx  10xxxxxx                      Most Latin characters
+#  16    3   1110xxxx  10xxxxxx  10xxxxxx            Most other basic characters in common use
+#  21    4   11110xxx  10xxxxxx  10xxxxxx  10xxxxxx  Rare Chinese, Japanese, Korean and math
+
+# Special regular expression characters:
+# ======================================
+# ( ) Open and close parenthesis are used to group expression and force precedence.
+#  *  Matches zero or more times of the previous expression.
+#  +  Matches one or more times of the previous expression.
+#  ?  Matches zero or one time of the previous expression.
+#     Two consecutive expressions matches one expression followed by the other, lower precedence than *, + and ?.
+#  |  Matches one expression OR the other expression, should have been lower precedence than *, + and ?, but is equal here.
+#
+# Parse the expressions left to right with 1 look ahead for *, + and ?. Use parenthesis to force precedence.
+
+# "string of characters"
+# ======================
+# A string of characters, "string", will be treated as: ( 's' 't' 'r' 'i' 'n' 'g' )
+# In other words, the characters in the string will be grouped together and force precedence
+
+# [set of characters]
+# ===================
+# A set of characters, [abcdef], will be treated as: ( 'a' | 'b' | 'c' | 'd' | 'e' | 'f' )
+# Character sets are encoded in 32 bytes (256 bits) to cover the range of values from 0 to 255.
+# A set of characters are just a bunch of single characters, escape characters and intervals concatenated
+# after each other (followed by an optional ~ and characters to be excluded) enclosed between [ and ].
+# Interval, e.g. a-f means abcdef, \10-\12 means \10\11\12. Exclusions, e.g. 0-9~57 means 01234689.
+
+# Definition of tokens with regular expressions
+# =============================================
+# The longest sequence matching a token will be used.
+# If different tokens match the same sequence, then the last definition will be used.
+# END_OF_FILE is the name of a predefined token matching end of the file.
+
+# Tokens that will be ignored
+# ===========================
+
+Ignore COMMENT = '#' [\01-\FF~\0A\0D]*;
+Ignore SPACE   = [\09\20]+;
+Ignore NL      = '\0A' | '\0D' | "\0D\0A" | "\0A\0D";
+
+# Const expressions for char, string and set, opens up for Latin 1, UTF8 and similar encodings
+# ============================================================================================
+
+Temp  h               = [0-9A-Fa-f];                                 # Hexadecimal digits.
+Temp  ESC_CH_HEX      = '\\' h h;
+Temp  ESC_CH_G        = '\\' [!"#$%&'()*+,\-./:;<=>?@[\\\]^_'{|}\~]; # Visible graphical characters (not alphabetic or digit).
+Temp  ESC_CH          = ESC_CH_HEX | ESC_CH_G;
+Temp  CONST_SET_CH    = [\01-\FF~\0A\0D\-\\\]\~] | ESC_CH;           # Excluded lf cr - \ ] ~
+Temp  CONST_SET_CHARS = ((CONST_SET_CH '-' CONST_SET_CH) | CONST_SET_CH)*;
+
+Token CONST_CH     = '\'' ([\01-\FF~\0A\0D'\\] | ESC_CH)  '\'';
+Token CONST_STRING = '"' ([\01-\FF~\0A\0D"\\] | ESC_CH)* '"';
+Token CONST_SET    = '[' CONST_SET_CHARS ('~' CONST_SET_CHARS)? ']';
+
+# More tokens
+# ===========
+
+Token LABEL     = [_A-Za-z] [_A-Za-z0-9]*;         # Compatible with C++
+Token VARIABLE  = '<' [_A-Za-z] [_A-Za-z0-9]* '>'; # Compatible with C++ when '<' and '>' are swaped out with '_'
+
+Token _Token    = "Token";
+Token _Temp     = "Temp";
+Token _Ignore   = "Ignore";
+
+Token _Rule     = "Rule";
+Token _Skip     = "Skip";
+
+Token EQUAL     = '=';
+Token OPEN_PAR  = '(';
+Token CLOSE_PAR = ')';
+Token ASTERIX   = '*';
+Token PLUS      = '+';
+Token QUESTION  = '?';
+Token OR        = '|';
+Token SEMICOLON = ';';
+
+# Grammar written in LL(1)
+# ========================
+
+# <Start> is the main entry point. An invisible temporary rule with a single production will call <Start> like this:
+# Rule <> = <Start> END_OF_FILE;
+
+# Rules that are only trix to work around limitations in a LL(1) grammar can be skiped in the final parse tree.
+# Just use the keyword Skip instead of Rule. This will make the final parse tree much cleaner.
+# Some ambiguity might be introduced, but in most cases it should be easy to handle.
+
+Skip <Start>     = <Stmts>;
+
+Skip <Stmts>     = <TokenDecl> <Stmts>
+                 | <RuleDecl>  <Stmts>
+                 | ;
+
+
+Rule <TokenDecl>     = <TokenType> LABEL EQUAL <TokenExpr> SEMICOLON;
+
+Skip <TokenType>     = _Token
+                     | _Temp
+                     | _Ignore;
+
+Skip <TokenExpr>     = <TokenExprPar> <TokenExprTail>
+                     | LABEL          <TokenExprTail>
+                     | CONST_CH       <TokenExprTail>
+                     | CONST_STRING   <TokenExprTail>
+                     | CONST_SET      <TokenExprTail>;
+
+Rule <TokenExprPar>  = OPEN_PAR  <TokenExpr> CLOSE_PAR;
+
+Skip <TokenExprTail> = <TokenRepeat> <TokenExprTail>
+                     |               <TokenExpr>
+                     | OR            <TokenExpr>
+                     | ;
+
+Skip <TokenRepeat>   = ASTERIX
+                     | PLUS
+                     | QUESTION;
+
+
+Rule <RuleDecl>     = <RuleType> VARIABLE EQUAL <RuleExpr> SEMICOLON;
+
+Skip <RuleType>     = _Rule
+                    | _Skip;
+
+Skip <RuleExpr>     = <RuleProd> <RuleExprTail>;
+
+Skip <RuleExprTail> = OR <RuleExpr>
+                    | ;
+
+Rule <RuleProd>     = LABEL    <RuleProdTail>
+                    | VARIABLE <RuleProdTail>
+                    | ;
+
+Skip <RuleProdTail> = LABEL    <RuleProdTail>
+                    | VARIABLE <RuleProdTail>
+                    | ;
+
+# End of file
