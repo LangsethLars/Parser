@@ -11,19 +11,8 @@ Here are some useful links about this subject:
 * <http://www.cs.miami.edu/~tptp/>
 
 Parser is not finished but it works. Better error handling should be implemented. The bootstrapper was implemented first. This was used to generate two files **Parser_Bootstrap.cpp** and **Parser_Bootstrap.h**.
-These files was then used for lexing and parsing the text file **DefaultCFG.txt** to generate **Parser_DefaultCFG.cpp" and **Parser_DefaultCFG.h**. They are equal to the other two files as they should be.
+These files was then used for lexing and parsing the text file **DefaultCFG.txt** to generate **Parser_DefaultCFG.cpp** and **Parser_DefaultCFG.h**. They are equal to the other two files as they should be.
 The text file is meant to represent what was done during the bootstrap. The files **Parser.cpp** and **Parser.h** is meant to be used stand alone together with the generated files with lookup tables.
-
-So far the following are finished:
-* Main.cpp - Just to start the code.
-* NFA.h and NFA.cpp - Nondeterministic Finite Automaton.
-* ChSet.h - Just a helper class for NFA.
-* DFA.h and DFA.cpp - Deterministic Finite Automaton.
-* BitSet.h and BitSet.cpp - Helper class to convert NFA to DFA (remember multiple states in NFA).
-* LexGenerator.h and LexGenerator.cpp - Bootstrap to create the first .dfa file to drive a Lexer.
-* Lexer.h and Lexer.cpp - A stand alone class for transforming a file into a list of tokens (to be used by a parser).
-
-Next step will be to implement a hand written parser to make it possible to make other lex specifications than LexBootstrap.dfa.
 
 The project is created in Visual Studio 2017. Most windows specific things has been removed just in case somebody need to run it on another platform. The remaining VS2017 spesific files are:
 * Parser.sln - 
