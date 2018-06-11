@@ -4,11 +4,8 @@ No fancy error messages and no fancy binary format for output. See **The Dragon 
 and **Introduction to Automata Theory, Languages, and Computation** <http://infolab.stanford.edu/~ullman/ialc.html> for details on the theory.
 **Coursera** <https://www.coursera.org/> had two courses covering this theory: **Automata** by Jeffrey Ullman, and **Compilers** by Alex Aiken.
 
-This project is meant as part of a bigger project **MetaMathVerifier** that will read mathematical proofs from a text file in a simple mathematical language and verify the proof.
-Here are some useful links about this subject:
-* <https://github.com/david-a-wheeler/metamath-test>
-* <http://us.metamath.org/>
-* <http://www.cs.miami.edu/~tptp/>
+This project is meant as part of a bigger project **MetaMath** <https://github.com/LangsethLars/MetaMath> that will read mathematical proofs from a text file in a simple mathematical language and verify the proof.
+It has already been done by others, but I need to do it myself to really understand all the details before I go on with automated theorem provers and AI.
 
 Parser is not finished but it works. Better error handling should be implemented. The bootstrapper was implemented first. This was used to generate two files **Parser_Bootstrap.cpp** and **Parser_Bootstrap.h**.
 These files was then used for lexing and parsing the text file **DefaultCFG.txt** to generate **Parser_DefaultCFG.cpp** and **Parser_DefaultCFG.h**. They are equal to the other two files as they should be.
