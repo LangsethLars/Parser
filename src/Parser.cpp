@@ -240,9 +240,9 @@ bool Parser::lexAndParseRawText()
 
 int Parser::getTokenClassId(const char *name)
 {
-	for (int i = 0; i < m_TokenClasses.size(); ++i)
+	for (size_t i = 0; i < m_TokenClasses.size(); ++i)
 		if (m_TokenClasses[i].name == name)
-			return i;
+			return int(i);
 
 	return -1;
 }
@@ -251,9 +251,9 @@ int Parser::getTokenClassId(const char *name)
 
 int Parser::getVariableClassId(const char *name)
 {
-	for (int i = 0; i < m_VariableClasses.size(); ++i)
+	for (size_t i = 0; i < m_VariableClasses.size(); ++i)
 		if (m_VariableClasses[i].name == name)
-			return i;
+			return int(i);
 
 	return -1;
 }
@@ -357,20 +357,20 @@ Parser::debug()
 void NodeIter::debug(const char *msg)
 {
 	printf("NodeIter message: %s\n    m_NTokenSequence = %d\n", msg, m_NParseTree);
-	if (m_ParserPtr != 0 && m_NParseTree >= 0 && m_NParseTree < m_ParserPtr->m_ParseTree.size()) {
+	if (m_ParserPtr != 0 && m_NParseTree >= 0 && m_NParseTree < int(m_ParserPtr->m_ParseTree.size())) {
 		ParseNode &node = m_ParserPtr->m_ParseTree[m_NParseTree];
 		printf("    Node: symb=%d, parent=%d, firstChild = %d, lastChild=%d, prev=%d, next =%d\n", node.symbolIdOrTokenSequenceNo, node.parent, node.firstChild, node.lastChild, node.prev, node.next);
 		if (node.symbolIdOrTokenSequenceNo < 0) {
 			int ind = -(node.symbolIdOrTokenSequenceNo + 1);
-			if (ind >= 0 && ind < m_ParserPtr->m_VariableClasses.size())
+			if (ind >= 0 && ind < int(m_ParserPtr->m_VariableClasses.size()))
 				printf("    Symbol = %s\n", m_ParserPtr->m_VariableClasses[ind].name.c_str());
 			else
 				printf("    Symbol out of range.\n");
 		} else {
-			if (node.symbolIdOrTokenSequenceNo < m_ParserPtr->m_TokenSequence.size()) {
+			if (node.symbolIdOrTokenSequenceNo < int(m_ParserPtr->m_TokenSequence.size())) {
 				Token &token = getToken();
 				printf("    Token: id=%d, line=%d, start=%d, length=%d\n", token.tokenClassId, token.lineNumber, token.lexemeStart, token.lexemeLength);
-				if (token.tokenClassId >= 0 && token.tokenClassId < m_ParserPtr->m_TokenClasses.size()) {
+				if (token.tokenClassId >= 0 && token.tokenClassId < int(m_ParserPtr->m_TokenClasses.size())) {
 					std::string str = lexeme();
 					printf("        Token %s = \"%s\"\n", m_ParserPtr->m_TokenClasses[token.tokenClassId].name.c_str(), str.c_str());
 					const unsigned char *p = &m_ParserPtr->m_RawText[token.lexemeStart];

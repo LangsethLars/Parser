@@ -26,8 +26,8 @@ Token INCLUDE = "$[" ws [\21-\7E~$]* ws "$]";
 # More tokens
 # ===========
 
-Token LABEL     = [_A-Za-z0-9\-_.]*; # Some tokens marked as LABEL might be MATH instead
 Token MATH      = [\21-\7E~$]+;      # Some tokens marked as LABEL might be MATH instead
+Token LABEL     = [_A-Za-z0-9\-_.]*; # Some tokens marked as LABEL might be MATH instead
 
 Token BEGIN     = "${";
 Token END       = "$}";
@@ -61,7 +61,7 @@ Skip <Stmts> = <BlockDecl>    <Stmts>
              | <ConstDecl>    <Stmts>
              | <VarDecl>      <Stmts>
              | <DisjointDecl> <Stmts>
-			 | <LabelDecl>    <Stmts>
+             | <LabelDecl>    <Stmts>
              | ;
 
 Rule <BlockDecl> = BEGIN <Stmts> END;
@@ -75,7 +75,7 @@ Skip <VarExprTail> = <Math> <VarExprTail> | ;
 Rule <DisjointDecl>     = DISJOINT <Math> <Math> <DisjointExprTail> STOP;
 Skip <DisjointExprTail> = <Math> <DisjointExprTail> | ;
 
-Skip <LabelDecl>     = LABEL <LabelDeclTail>;
+Rule <LabelDecl>     = LABEL <LabelDeclTail>;
 Skip <LabelDeclTail> = FLOATING  <Math> <Math>         STOP  # Const Var
                      | LOGICAL   <Math> <MathExprTail> STOP  # Const Math*
                      | AXIOMATIC <Math> <MathExprTail> STOP  # Const Math*
