@@ -1,16 +1,4 @@
 #include "Parser.h"
-#include "Parser_Bootstrap.h"
-
-
-
-Parser::Parser() :
-	m_TokenClasses(Parser_Bootstrap::g_TokenClasses),
-	m_VariableClasses(Parser_Bootstrap::g_VariableClasses),
-	m_LexerTable(Parser_Bootstrap::g_LexerTable),
-	m_Productions(Parser_Bootstrap::g_Productions),
-	m_ParsingTable(Parser_Bootstrap::g_ParsingTable)
-{
-}
 
 
 
@@ -102,32 +90,6 @@ bool Parser::lexRawText()
 
 
 
-void
-Parser::displayErrorMessage(const unsigned char *pTokenStart, const unsigned char *pTokenErr, int tokenLineNumber)
-{
-	const unsigned char *pRawText = (const unsigned char *)&m_RawText[0];
-	const unsigned char *pRawTextEnd = pRawText + m_RawText.size();
-
-	const unsigned char *p;
-
-	// Find start of line with error
-	const unsigned char *pLineStart = pTokenStart;
-	for (; pLineStart >= pRawText && *pLineStart != 10 && *pLineStart != 13; --pLineStart); ++pLineStart;
-
-	// Find end of line with error
-	const unsigned char *pLineEnd = pTokenStart;
-	for (; pLineEnd < pRawTextEnd && *pLineEnd != 10 && *pLineEnd != 13; ++pLineEnd);
-
-	// Error message
-	printf("Error in line %d:\n%s\n", tokenLineNumber, std::string((const char *)pLineStart, pLineEnd - pLineStart).c_str());
-	for (p = pLineStart; p < pTokenStart; ++p) printf(" ");
-	for (; p < pTokenErr && p < pLineEnd; ++p) printf("^");
-	printf("\n");
-
-}	// End of displayErrorMessage()
-
-
-
 bool Parser::lexAndParseRawText()
 {
 	m_ParseTree.clear();
@@ -165,7 +127,8 @@ bool Parser::lexAndParseRawText()
 
 		if (symb == tokenId) {
 
-			// printf("Parsing token match: %42s\n", m_TokenClasses[tokenId].name.c_str());
+			// std::string lexeme((const char *)&m_RawText[m_TokenSequence[tokenNo].lexemeStart], m_TokenSequence[tokenNo].lexemeLength);
+			// printf("Parsing token match: %42s    \"%20s\"\n", m_TokenClasses[tokenId].name.c_str(), lexeme.c_str());
 			
 			current = int(m_ParseTree.size());
 			currentParent = parent.back();
@@ -196,6 +159,7 @@ bool Parser::lexAndParseRawText()
 		} else if (symb >= 0) {
 
 			printf("Error in parsing: Token %d with id %d should have been %d.\n", tokenNo, tokenId, symb);
+			displayErrorMessage(&m_RawText[m_TokenSequence[tokenNo].lexemeStart], &m_RawText[m_TokenSequence[tokenNo].lexemeStart + m_TokenSequence[tokenNo].lexemeLength], m_TokenSequence[tokenNo].lineNumber);
 
 			ok = false;
 			break;
@@ -208,12 +172,13 @@ bool Parser::lexAndParseRawText()
 			if (productionNo < 0) {
 
 				printf("Error in parsing: No matching production for variable %s and token %s\n", m_VariableClasses[varId].name.c_str(), m_TokenClasses[tokenId].name.c_str());
+				displayErrorMessage(&m_RawText[m_TokenSequence[tokenNo].lexemeStart], &m_RawText[m_TokenSequence[tokenNo].lexemeStart + m_TokenSequence[tokenNo].lexemeLength], m_TokenSequence[tokenNo].lineNumber);
 				ok = false;
 				break;
 
 			} else {
 
-				// printf("Parsing production match: Table[%15s,%15s] ==> %d\n", m_VariableClasses[symb].name.c_str(), m_TokenClasses[tokenId].name.c_str(), productionNo);
+				// printf("Parsing production match: Table[%15s,%15s] ==> %d\n", m_VariableClasses[varId].name.c_str(), m_TokenClasses[tokenId].name.c_str(), productionNo);
 
 				current = int(m_ParseTree.size());
 				currentParent = parent.back();
@@ -263,6 +228,7 @@ bool Parser::lexAndParseRawText()
 		}
 		if (tokenNo < int(m_TokenSequence.size())) {
 			printf("Error in parsing: %d tokens left in sequence, nest token is %s\n", int(m_TokenSequence.size()) - tokenNo, m_TokenClasses[tokenNo].name.c_str());
+			displayErrorMessage(&m_RawText[m_TokenSequence[tokenNo].lexemeStart], &m_RawText[m_TokenSequence[tokenNo].lexemeStart + m_TokenSequence[tokenNo].lexemeLength], m_TokenSequence[tokenNo].lineNumber);
 			ok = false;
 		}
 	}
@@ -291,6 +257,32 @@ int Parser::getVariableClassId(const char *name)
 
 	return -1;
 }
+
+
+
+void
+Parser::displayErrorMessage(const unsigned char *pTokenStart, const unsigned char *pTokenErr, int tokenLineNumber)
+{
+	const unsigned char *pRawText = (const unsigned char *)&m_RawText[0];
+	const unsigned char *pRawTextEnd = pRawText + m_RawText.size();
+
+	const unsigned char *p;
+
+	// Find start of line with error
+	const unsigned char *pLineStart = pTokenStart;
+	for (; pLineStart >= pRawText && *pLineStart != 10 && *pLineStart != 13; --pLineStart); ++pLineStart;
+
+	// Find end of line with error
+	const unsigned char *pLineEnd = pTokenStart;
+	for (; pLineEnd < pRawTextEnd && *pLineEnd != 10 && *pLineEnd != 13; ++pLineEnd);
+
+	// Error message
+	printf("Error in line %d:\n%s\n", tokenLineNumber, std::string((const char *)pLineStart, pLineEnd - pLineStart).c_str());
+	for (p = pLineStart; p < pTokenStart; ++p) printf(" ");
+	for (; p < pTokenErr && p < pLineEnd; ++p) printf("^");
+	printf("\n");
+
+}	// End of displayErrorMessage()
 
 
 void

@@ -107,26 +107,33 @@ class Parser {
 
 public:
 
-	Parser();
 	Parser(const TokenClasses &tc, const VariableClasses &vc, const LexerTable &lt, const Productions &prod, const ParsingTable &pt);
 
 	bool lexRawText();
 	bool lexAndParseRawText();
 
+	void displayErrorMessage(const unsigned char *pTokenStart, const unsigned char *pTokenErr, int tokenLineNumber);
+	void debug();
+
+private:
+
 	int getTokenClassId(const char *name);
 	int getVariableClassId(const char *name);
 
-	void displayErrorMessage(const unsigned char *pTokenStart, const unsigned char *pTokenErr, int tokenLineNumber);
-	void debug();
+public:
 
 	// Fixed token/variable classes
 	const TokenClasses &m_TokenClasses;
 	const VariableClasses &m_VariableClasses;
 
+private:
+
 	// Fixed table driven lexer and parser
 	const LexerTable &m_LexerTable;
 	const Productions &m_Productions;
 	const ParsingTable &m_ParsingTable;
+
+public:
 
 	// Result from lex() and lexAndParse()
 	RawText m_RawText;

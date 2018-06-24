@@ -3,6 +3,7 @@
 #include "Parser.h"
 #include "BuildNFA.h"
 #include "BuildParser.h"
+#include "Parser_Bootstrap.h"
 
 
 
@@ -12,6 +13,7 @@ public:
 
 	Generator() :
 		m_StatusOk(true),
+		m_Parser(Parser_Bootstrap::g_TokenClasses, Parser_Bootstrap::g_VariableClasses, Parser_Bootstrap::g_LexerTable, Parser_Bootstrap::g_Productions, Parser_Bootstrap::g_ParsingTable),
 		m_ParserDef(m_TokenClasses, m_VariableClasses, m_Productions) {
 	}
 
@@ -46,6 +48,8 @@ private:
 
 	bool saveTables(char *rootName);
 	bool readCfgFile(char *rootName, RawText &rawText);
+
+private:
 
 	bool m_StatusOk;
 

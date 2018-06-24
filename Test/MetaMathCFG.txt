@@ -1,0 +1,86 @@
+# The alphabet
+# ============
+
+# The alphabet is in a subset of ASCII (just for simplicity):
+# [\09\0A\0C\0D\20\21-\7E] tab, lf, ff, cr, space and the 94 visible ASCII characters \21-\7E.
+#
+# Grave accents \60 (not apostrophe \27) and tilde \7E has special formating meaning in comments.
+#
+# This spesification will accept some cases that are not legal in MetaMath, like
+# missing whitespace after comment and before the next command:
+# $( comment $)$c 0 + = $.
+
+# Tokens that will be ignored
+# ===========================
+
+Temp   ws         = [\09\0A\0C\0D\20]+;
+
+Ignore COMMENT    = "$(" ws ( [\09\0A\0C\0D\20-\7E~$] | ( '$' [\09\0A\0C\0D\20-\7E~()] ) )* ws "$)";
+Ignore WHITESPACE = ws;
+
+# Preprocessing token
+# ===================
+
+Token INCLUDE = "$[" ws [\21-\7E~$]* ws "$]";
+
+# More tokens
+# ===========
+
+Token LABEL     = [_A-Za-z0-9\-_.]*; # Some tokens marked as LABEL might be MATH instead
+Token MATH      = [\21-\7E~$]+;      # Some tokens marked as LABEL might be MATH instead
+
+Token BEGIN     = "${";
+Token END       = "$}";
+
+Token CONST     = "$c";
+Token VAR       = "$v";
+Token DISJOINT  = "$d";
+
+# Hypothesis
+Token FLOATING  = "$f";
+Token LOGICAL   = "$e";
+
+# Assertions
+Token AXIOMATIC = "$a";
+Token THEOREM   = "$p";
+Token PROOF     = "$=";
+
+Token STOP  = "$.";
+
+Token ERROR = '$' [\21-\7E] [\21-\7E]+; # Just to enforce whitespace around most keywords
+
+
+# Grammar written in LL(1)
+# ========================
+
+Skip <Start> = <Stmts>;
+
+Skip <Math>  = LABEL | MATH;
+
+Skip <Stmts> = <BlockDecl>    <Stmts>
+             | <ConstDecl>    <Stmts>
+             | <VarDecl>      <Stmts>
+             | <DisjointDecl> <Stmts>
+			 | <LabelDecl>    <Stmts>
+             | ;
+
+Rule <BlockDecl> = BEGIN <Stmts> END;
+
+Rule <ConstDecl>     = CONST <Math> <ConstExprTail> STOP;
+Skip <ConstExprTail> = <Math> <ConstExprTail> | ;
+
+Rule <VarDecl>     = VAR <Math> <VarExprTail> STOP;
+Skip <VarExprTail> = <Math> <VarExprTail> | ;
+
+Rule <DisjointDecl>     = DISJOINT <Math> <Math> <DisjointExprTail> STOP;
+Skip <DisjointExprTail> = <Math> <DisjointExprTail> | ;
+
+Skip <LabelDecl>     = LABEL <LabelDeclTail>;
+Skip <LabelDeclTail> = FLOATING  <Math> <Math>         STOP  # Const Var
+                     | LOGICAL   <Math> <MathExprTail> STOP  # Const Math*
+                     | AXIOMATIC <Math> <MathExprTail> STOP  # Const Math*
+                     | THEOREM   <Math> <MathExprTail> PROOF <Math> <MathExprTail> STOP;  # Const Math* ...
+# ... after PROOF has to be parsed manually because of possible compressed format or unfinished with ?
+Skip <MathExprTail>  = <Math> <MathExprTail> | ;
+
+# End of file

@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
 
 	Generator generator;
 	//ok = generator.bootstrap();
-	ok = generator.buildTablesFrom("DefaultCFG");
+//	ok = generator.buildTablesFrom("DefaultCFG");
+	ok = generator.buildTablesFrom("MetaMathCFG");
 
 	if (ok)
 		printf("\nFinished with no errors.\n");
