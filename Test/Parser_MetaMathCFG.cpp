@@ -37,7 +37,8 @@ namespace Parser_MetaMathCFG {
         {"<VarExprTail>", true},//10
         {"<DisjointExprTail>", true},//11
         {"<LabelDeclTail>", true},//12
-        {"<MathExprTail>", true}//13
+        {"<MathExprTail>", true},//13
+        {"<ProofTail>", true}//14
     }; // End of g_VariableClasses
 
     LexerTable g_LexerTable = {
@@ -398,9 +399,11 @@ namespace Parser_MetaMathCFG {
         {12, {11,-4,-4,16} }, //21  <LabelDeclTail> ==>  FLOATING  <Math>  <Math>  STOP
         {12, {12,-4,-14,16} }, //22  <LabelDeclTail> ==>  LOGICAL  <Math>  <MathExprTail>  STOP
         {12, {13,-4,-14,16} }, //23  <LabelDeclTail> ==>  AXIOMATIC  <Math>  <MathExprTail>  STOP
-        {12, {14,-4,-14,15,-4,-14,16} }, //24  <LabelDeclTail> ==>  THEOREM  <Math>  <MathExprTail>  PROOF  <Math>  <MathExprTail>  STOP
+        {12, {14,-4,-14,15,5,-15,16} }, //24  <LabelDeclTail> ==>  THEOREM  <Math>  <MathExprTail>  PROOF  LABEL  <ProofTail>  STOP
         {13, {-4,-14} }, //25  <MathExprTail> ==>  <Math>  <MathExprTail>
-        {13, {} } //26  <MathExprTail> ==>
+        {13, {} }, //26  <MathExprTail> ==>
+        {14, {5,-15} }, //27  <ProofTail> ==>  LABEL  <ProofTail>
+        {14, {} } //28  <ProofTail> ==>
     }; // End of g_Productions
 
     ParsingTable g_ParsingTable = {
@@ -418,7 +421,8 @@ namespace Parser_MetaMathCFG {
            -1,   -1,   -1,   -1,   15,   15,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   16,   -1, //10  <VarExprTail>
            -1,   -1,   -1,   -1,   18,   18,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   19,   -1, //11  <DisjointExprTail>
            -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   21,   22,   23,   24,   -1,   -1,   -1, //12  <LabelDeclTail>
-           -1,   -1,   -1,   -1,   25,   25,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   26,   26,   -1  //13  <MathExprTail>
+           -1,   -1,   -1,   -1,   25,   25,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   26,   26,   -1, //13  <MathExprTail>
+           -1,   -1,   -1,   -1,   -1,   27,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   28,   -1  //14  <ProofTail>
     }; // End of g_ParsingTable
 
 }

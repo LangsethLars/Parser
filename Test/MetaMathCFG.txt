@@ -26,8 +26,8 @@ Token INCLUDE = "$[" ws [\21-\7E~$]* ws "$]";
 # More tokens
 # ===========
 
-Token MATH      = [\21-\7E~$]+;      # Some tokens marked as LABEL might be MATH instead
-Token LABEL     = [_A-Za-z0-9\-_.]*; # Some tokens marked as LABEL might be MATH instead
+Token MATH      = [\21-\7E~$]+;     # Some tokens marked as LABEL might be MATH instead
+Token LABEL     = [A-Za-z0-9\-_.]*; # Some tokens marked as LABEL might be MATH instead
 
 Token BEGIN     = "${";
 Token END       = "$}";
@@ -79,8 +79,14 @@ Rule <LabelDecl>     = LABEL <LabelDeclTail>;
 Skip <LabelDeclTail> = FLOATING  <Math> <Math>         STOP  # Const Var
                      | LOGICAL   <Math> <MathExprTail> STOP  # Const Math*
                      | AXIOMATIC <Math> <MathExprTail> STOP  # Const Math*
-                     | THEOREM   <Math> <MathExprTail> PROOF <Math> <MathExprTail> STOP;  # Const Math* ...
+
+#                    | THEOREM   <Math> <MathExprTail> PROOF <Math> <MathExprTail> STOP;  # Const Math* PROOF ... STOP
 # ... after PROOF has to be parsed manually because of possible compressed format or unfinished with ?
+
+                     | THEOREM   <Math> <MathExprTail> PROOF LABEL <ProofTail> STOP;  # Const Math* PROOF LABEL* STOP
+# Assume MetaMath file is stored in uncompressed and finished (no ?) format.
+
 Skip <MathExprTail>  = <Math> <MathExprTail> | ;
+Skip <ProofTail>     = LABEL  <ProofTail>    | ;
 
 # End of file

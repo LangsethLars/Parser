@@ -46,7 +46,8 @@ namespace Parser_MetaMathCFG {
         _VarExprTail_ = 10,
         _DisjointExprTail_ = 11,
         _LabelDeclTail_ = 12,
-        _MathExprTail_ = 13
+        _MathExprTail_ = 13,
+        _ProofTail_ = 14
     }; // End of enum class VariableId
 
     enum class SymbolId {
@@ -63,7 +64,8 @@ namespace Parser_MetaMathCFG {
         _VarExprTail_ = -11,
         _DisjointExprTail_ = -12,
         _LabelDeclTail_ = -13,
-        _MathExprTail_ = -14
+        _MathExprTail_ = -14,
+        _ProofTail_ = -15
     }; // End of enum class VariableId
 
 } // End of namespace Parser_MetaMathCFG
