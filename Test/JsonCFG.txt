@@ -1,0 +1,83 @@
+# Tokens for JSON
+# ===============
+
+Ignore WHITESPACE  = [\09\0A\0D\20]+;
+
+Temp  h            = [0-9A-Fa-f];
+Temp  ESC_CH_HEX   = '\\' 'u' h h h h;
+Temp  ESC_CH_G     = '\\' ["/\\bfnrt];
+Temp  ESC_CH       = ESC_CH_HEX | ESC_CH_G;
+
+Token STRING       = '"' ([\20-\FF~"\\] | ESC_CH)* '"';
+Token NUMBER       = '-'? ( '0' | ([1-9] [0-9]*) ) ('.' [0-9]+)? ([Ee] [-+]? [0-9]+)?
+
+Token LABEL        = [_A-Za-z] [_A-Za-z0-9]*;         # Compatible with C++
+Token VARIABLE     = '<' [_A-Za-z] [_A-Za-z0-9]* '>'; # Compatible with C++ when '<' and '>' are swaped out with '_'
+
+Token true         = "true";
+Token false        = "false";
+Token null         = "null";
+
+Token OPEN_CURL    = '{';
+Token CLOSE_CURL   = '}';
+Token OPEN_SQUARE  = '{';
+Token CLOSE_SQUARE = '}';
+Token COLON        = ';';
+Token COMMA        = ',';
+
+# Grammar written in LL(1)
+# ========================
+
+# <Start> is the main entry point. An invisible temporary rule with a single production will call <Start> like this:
+# Rule <> = <Start> END_OF_FILE;
+
+Skip <Start>     = <Object>;
+
+Rule <Object>    = OPEN_CURL <PAIR_LIST> CLOSE_CURL;
+
+Skip <PAIR_LIST> = <PAIR> <PAIR_MORE>
+                 | COMMA
+
+Rule <TokenDecl>     = <TokenType> LABEL EQUAL <TokenExpr> SEMICOLON;
+
+Skip <TokenType>     = _Token
+                     | _Temp
+                     | _Ignore;
+
+Skip <TokenExpr>     = <TokenExprPar> <TokenExprTail>
+                     | LABEL          <TokenExprTail>
+                     | CONST_CH       <TokenExprTail>
+                     | CONST_STRING   <TokenExprTail>
+                     | CONST_SET      <TokenExprTail>;
+
+Rule <TokenExprPar>  = OPEN_PAR  <TokenExpr> CLOSE_PAR;
+
+Skip <TokenExprTail> = <TokenRepeat> <TokenExprTail>
+                     |               <TokenExpr>
+                     | OR            <TokenExpr>
+                     | ;
+
+Skip <TokenRepeat>   = ASTERIX
+                     | PLUS
+                     | QUESTION;
+
+
+Rule <RuleDecl>     = <RuleType> VARIABLE EQUAL <RuleExpr> SEMICOLON;
+
+Skip <RuleType>     = _Rule
+                    | _Skip;
+
+Skip <RuleExpr>     = <RuleProd> <RuleExprTail>;
+
+Skip <RuleExprTail> = OR <RuleExpr>
+                    | ;
+
+Rule <RuleProd>     = LABEL    <RuleProdTail>
+                    | VARIABLE <RuleProdTail>
+                    | ;
+
+Skip <RuleProdTail> = LABEL    <RuleProdTail>
+                    | VARIABLE <RuleProdTail>
+                    | ;
+
+# End of file
