@@ -1,16 +1,85 @@
-/*
-!/.gitignore
-!/README.md
+# -----------------------------------------
+# Visual Studio user-specific files
+# -----------------------------------------
+.vs/
+*.suo
+*.user
+*.userosscache
+*.rsuser
+*.sln.docstates
 
-!/Parser.sln
-!/Parser.vcxproj
-!/Parser.vcxproj.filters
+# -----------------------------------------
+# Visual Studio / MSBuild output
+# -----------------------------------------
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+out/
+obj/
+bin/
 
-!/*.cpp
-!/*.h
+# Per-project nested output folders
+**/[Dd]ebug/
+**/[Rr]elease/
+**/x64/
+**/x86/
+**/out/
+**/obj/
+**/bin/
 
-!/src
-!/src/*
+# -----------------------------------------
+# C/C++ intermediate and binary files
+# -----------------------------------------
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.idb
+*.iobj
+*.ipdb
+*.exp
+*.lib
+*.dll
+*.exe
 
-!/Test
-!/Test/*
+# Visual C++ cache / browse DB
+ipch/
+*.VC.db
+*.VC.opendb
+*.opendb
+*.sdf
+
+# -----------------------------------------
+# Logs and temporary files
+# -----------------------------------------
+*.log
+*.tlog
+*.tmp
+*.cache
+*.err
+
+# -----------------------------------------
+# Test and profiling artifacts
+# -----------------------------------------
+[Tt]est[Rr]esult*/
+*.trx
+*.psess
+*.vsp
+*.vspx
+
+# -----------------------------------------
+# OS/editor noise
+# -----------------------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------------------
+# Optional: generated docs/build artifacts
+# Uncomment only if you later introduce them
+# -----------------------------------------
+# docs/_site/
+# build/
+# dist/
