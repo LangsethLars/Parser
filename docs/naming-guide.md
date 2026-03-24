@@ -66,12 +66,17 @@ Generated parser files use the form:
 
 where `XXX` is derived from the input text file used to generate them.
 
+- `Parser_XXX.txt`
+
 Examples:
 
+- `Parser_Bootstrap.txt`
 - `Parser_Bootstrap.cpp`
 - `Parser_Bootstrap.h`
-- `Parser_DefaultCFG.cpp`
-- `Parser_DefaultCFG.h`
+
+- `Parser_Proof.txt`
+- `Parser_Proof.cpp`
+- `Parser_Proof.h`
 
 The underscore is intentional in this case.
 
@@ -84,33 +89,6 @@ This is not considered an inconsistency. It is a meaningful naming pattern for g
 
 ---
 
-## Why Underscore Is Allowed for Generated Files
-
-Underscore is allowed in generated filenames because it improves clarity.
-
-For example:
-
-- `Parser_Bootstrap.cpp` is easier to scan than `ParserBootstrap.cpp`
-- `Parser_DefaultCFG.cpp` clearly shows that `DefaultCFG` is the source-specific suffix
-
-The underscore signals that the file belongs to a generated family of files.
-
-This convention should be limited to generated parser files and similar generated artifacts.
-
----
-
-## Recommended Rule
-
-Use:
-
-- `PascalCase` for normal handwritten C++ files
-- `Parser_XXX.*` for generated parser files
-- `kebab-case` for Markdown documentation
-
-Do not introduce additional naming styles unless there is a strong reason.
-
----
-
 ## Examples
 
 ### Good
@@ -120,7 +98,7 @@ Do not introduce additional naming styles unless there is a strong reason.
 - `BitSet.h`
 - `Parser.cpp`
 - `Parser_Bootstrap.cpp`
-- `Parser_DefaultCFG.h`
+- `Parser_Proof.h`
 - `overview.md`
 - `nfa-to-dfa.md`
 

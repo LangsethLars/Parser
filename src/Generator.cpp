@@ -709,15 +709,6 @@ bool Generator::saveTables(char *rootName)
 	}
 	if (fprintf(hFp, "    }; // End of enum class TokenId\n") < 0) goto Finished;
 
-	id = 0;
-	if (fprintf(hFp, "\n") < 0) goto Finished;
-	if (fprintf(hFp, "    enum class VariableId {\n") < 0) goto Finished;
-	for (auto it = m_VariableClasses.begin(); it != m_VariableClasses.end(); ++it, ++id) {
-		std::string str(it->name); str.front() = '_'; str.back() = '_';
-		if (fprintf(hFp, "        %s = %d%s\n", str.c_str(), id, std::next(it, 1) != m_VariableClasses.end() ? "," : "") < 0) goto Finished;
-	}
-	if (fprintf(hFp, "    }; // End of enum class VariableId\n") < 0) goto Finished;
-
 	id = -1;
 	if (fprintf(hFp, "\n") < 0) goto Finished;
 	if (fprintf(hFp, "    enum class SymbolId {\n") < 0) goto Finished;
@@ -725,7 +716,7 @@ bool Generator::saveTables(char *rootName)
 		std::string str(it->name); str.front() = '_'; str.back() = '_';
 		if (fprintf(hFp, "        %s = %d%s\n", str.c_str(), id, std::next(it, 1) != m_VariableClasses.end() ? "," : "") < 0) goto Finished;
 	}
-	if (fprintf(hFp, "    }; // End of enum class VariableId\n") < 0) goto Finished;
+	if (fprintf(hFp, "    }; // End of enum class SymbolId\n") < 0) goto Finished;
 
 	if (fprintf(hFp, "\n") < 0) goto Finished;
 	if (fprintf(hFp, "} // End of namespace %s\n", nsName.c_str()) < 0) goto Finished;

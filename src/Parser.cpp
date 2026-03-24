@@ -77,7 +77,7 @@ bool Parser::lexRawText()
 
 	}
 
-	// End with and End Of File token (id = 0)
+	// End with an END_OF_FILE token (id = 0)
 	token.tokenClassId = 0;
 	token.lineNumber = lineNumber;
 	token.lexemeStart = 0; // Could have used m_RawText.size();

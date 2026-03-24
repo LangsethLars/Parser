@@ -20,6 +20,7 @@ The project is part of a larger goal: building a system for parsing and verifyin
 Detailed documentation is available in the `docs/` folder:
 
 * [Overview](docs/overview.md)
+* [Regular Expressions](docs/regular-expressions.md)
 * [Naming Guide](docs/naming-guide.md)
 
 More documentation will be added over time.
@@ -32,7 +33,7 @@ The project is developed using Visual Studio.
 
 1. Open `Parser.sln`
 2. Build the project
-3. Set the working directory to the `Test` folder (see project properties)
+3. Set the working directory to the `scripts` folder (see project properties)
 
 ---
 
