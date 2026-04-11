@@ -13,7 +13,7 @@
 
 #else
 
-//#define GENERATOR
+#define GENERATOR
 #ifdef GENERATOR
 
 #include "generator/Generator.h"
