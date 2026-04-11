@@ -1,3 +1,7 @@
+#==============================================================================#
+#                                    Lexer                                     #
+#==============================================================================#
+
 # The alphabet
 # ============
 
@@ -45,6 +49,9 @@
 # The longest sequence matching a token will be used.
 # If different tokens match the same sequence, then the last definition will be used.
 # END_OF_FILE is the name of a predefined token matching end of the file.
+# The keyword Ignore will skip this token in the lexed sequence.
+# The keyword Temp   will not create a new definition of a token, it will only be used in defining other tokens.
+# The keyword Token  will define a token that will appear in the lexed sequence.
 
 # Tokens that will be ignored
 # ===========================
@@ -70,8 +77,9 @@ Token CONST_SET    = '[' CONST_SET_CHARS ('~' CONST_SET_CHARS)? ']';
 # More tokens
 # ===========
 
-Token LABEL     = [_A-Za-z] [_A-Za-z0-9]*;         # Compatible with C++
-Token VARIABLE  = '<' [_A-Za-z] [_A-Za-z0-9]* '>'; # Compatible with C++ when '<' and '>' are swaped out with '_'
+Temp  ALPHANUM  = [_A-Za-z] [_A-Za-z0-9]*; # Compatible with C++ (just avoid name collisions with things in C++ and script)
+Token LABEL     = ALPHANUM;
+Token VARIABLE  = '<' ALPHANUM '>';        # Compatible with C++ when '<' and '>' are swapped out with '_'
 
 Token _Token    = "Token";
 Token _Temp     = "Temp";
@@ -89,13 +97,19 @@ Token QUESTION  = '?';
 Token OR        = '|';
 Token SEMICOLON = ';';
 
+
+
+#==============================================================================#
+#                                    Parser                                    #
+#==============================================================================#
+
 # Grammar written in LL(1)
 # ========================
 
 # <Start> is the main entry point. An invisible temporary rule with a single production will call <Start> like this:
 # Rule <> = <Start> END_OF_FILE;
 
-# Rules that are only trix to work around limitations in a LL(1) grammar can be skiped in the final parse tree.
+# Rules that are only tricks to work around limitations in a LL(1) grammar can be skipped in the final parse tree.
 # Just use the keyword Skip instead of Rule. This will make the final parse tree much cleaner.
 # Some ambiguity might be introduced, but in most cases it should be easy to handle.
 

@@ -220,7 +220,7 @@ Without parentheses:
 a|bc
 ```
 
-means either `a` or `bc`.
+should mean either `a` or `bc` (this is not correct in the current code).
 
 ---
 

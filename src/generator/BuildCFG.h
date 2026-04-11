@@ -1,21 +1,20 @@
 #pragma once
 
 #include "BitSet.h"
-#include "Parser.h"
+#include "../parser/LexerTypes.h"
+#include "../parser/ParserTypes.h"
 
 #include <string>
 #include <vector>
 
 
 
-class BuildParser {
+class BuildCFG {
 
 public:
 
-	BuildParser(TokenClasses &tokenClasses, VariableClasses &variableClasses, Productions &productions) :
+	BuildCFG(TokenClasses &tokenClasses) :
 		m_TokenClasses(tokenClasses),
-		m_VariableClasses(variableClasses),
-		m_Productions(productions),
 		m_StatusOk(true) {
 		//clear();
 	}
@@ -25,15 +24,20 @@ public:
 		m_ExtendVariables.clear();
 		m_Productions.clear();
 		m_ExtendProductions.clear();
+		m_ParsingTable.clear();
+
 		m_StatusOk = true;
 	}
 
-	BuildParser &addProduction(const char *variableName);
-	BuildParser &addSymbol(int symbolId) { m_Productions.back().symbols.emplace_back(symbolId); return *this; }
-	BuildParser &addTerminal(const char *tokenName);
-	BuildParser &addVariable(const char *variableName);
+	BuildCFG& addProduction(const char *variableName);
+	BuildCFG& addSymbol(int symbolId) { m_Productions.back().symbols.emplace_back(symbolId); return *this; }
+	BuildCFG& addTerminal(const char *tokenName);
+	BuildCFG& addVariable(const char *variableName);
 
-	bool buildParceTable(ParsingTable &parsingTable);
+	bool setVariableClassToSkip(const char* variableName);
+
+	bool buildParseTable();
+	bool saveCFG(const char* rootName);	// Used to save the parse tables created by buildParseTable() to files that can be used by the parser.
 
 	bool isOk() const { return m_StatusOk; }
 
@@ -47,10 +51,10 @@ private:
 	// Fixed token/variable classes
 
 	TokenClasses &m_TokenClasses;
-	VariableClasses &m_VariableClasses;
-	Productions &m_Productions;
 
 	// Local definition of parser
+
+	VariableClasses m_VariableClasses;
 
 	struct ExtendVariable {
 		bool m_CanBeEmpty;
@@ -60,11 +64,15 @@ private:
 	};
 	std::vector<ExtendVariable> m_ExtendVariables;
 
+	Productions m_Productions;
+
 	struct ExtendProduction {
 		bool m_CanBeEmpty;
 		BitSet m_FirstTerminals;
 	};
 	std::vector<ExtendProduction> m_ExtendProductions;
+
+	ParsingTable m_ParsingTable;
 
 	// Debugging and error handling
 	bool m_StatusOk;

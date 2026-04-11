@@ -52,12 +52,12 @@ The project consists of two main parts:
 
 The project includes a bootstrap process:
 
-1. A manually generated parser (**Parser_Bootstrap**) is created, moved into src/ and activated
-2. This parser reads a grammar file (`Parser_Bootstrap.txt`)
-3. It generates a new parser (**Parser_Bootstrap**)
+1. A manually generated parser (**Bootstrap_Lexer**) and (**Bootstrap_Parser**) is created, moved into src/ and activated
+2. This parser reads a grammar file (`Bootstrap.txt`)
+3. It generates a new parser (**Bootstrap_Lexer**) and (**Bootstrap_Parser**)
 4. The generated parser should be equivalent to the bootstrap version
 
-This helps to verify correctness of the generator and the file (`Parser_Bootstrap.txt`).
+This helps to verify correctness of the generator and the file (`Bootstrap.txt`).
 
 ---
 

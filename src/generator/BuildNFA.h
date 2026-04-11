@@ -5,7 +5,7 @@
 
 #include "ChSet.h"
 #include "BitSet.h"
-#include "Parser.h"
+#include "../parser/LexerTypes.h"
 
 
 
@@ -30,20 +30,20 @@ public:
 	BuildNFA &timesZeroOrMore();
 	BuildNFA &timesOneOrMore();
 
-	// Used to create a full NFA with many start and accepting states
-	void addToken(BuildNFA &newNFA, int tokenClassId);
+	// Extended API to create a full NFA with many start and accepting states
 
-	// Used to convert this NFA to a DFA
-	void convertToDFA(LexerTable &lexerTable);
+	bool addToken(BuildNFA &newNFA, const char* tokenName, bool ignoreToken = false);
 
-	void debug();
+	void debugNFA();					// Used to debug the full NFA
+	void convertToDFA();				// Used to convert this full NFA to a DFA
+	bool saveDFA(const char* rootName);	// Used to save the DFA tables created by convertToDFA() to files that can be used by the lexer.
 
 private:
 
 	// Used to convert this NFA to a DFA
 	void epsilonClosure(BitSet &nfaStates);
 	void epsilonFollow(BitSet &nfaStates, size_t pos);
-	int newStateDFA(LexerTable &lexerTable, BitSet &nfaStates, std::map<BitSet, int> &nfaStateMap);
+	int newStateDFA(BitSet &nfaStates, std::map<BitSet, int> &nfaStateMap);
 	int getTokenClassId(BitSet &nfaStates);
 
 private:
@@ -89,5 +89,10 @@ private:
 	// 0 -1 +2 -1 ***** Epsilon goto two forward and one back.
 	// 0 -1 +1  0  'b'  On 'b' goto next.
 	// 0  3 ** ** ***** Accepting tokenClassId = 3.
+
+public:
+
+	TokenClasses m_TokenClasses;	// Made by addToken()
+	LexerTable m_LexerTable;		// Made by convertToDFA()
 
 };  // End of class BuildNFA

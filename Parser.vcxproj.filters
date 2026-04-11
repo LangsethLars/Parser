@@ -14,46 +14,74 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Parser.cpp">
+    <ClCompile Include="src\parser\Bootstrap_Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BitSet.cpp">
+    <ClCompile Include="src\parser\LexerBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Generator.cpp">
+    <ClCompile Include="src\parser\Bootstrap_Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Parser_Bootstrap.cpp">
+    <ClCompile Include="src\parser\ParserBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BuildNFA.cpp">
+    <ClCompile Include="src\generator\BuildBootstrap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BuildParser.cpp">
+    <ClCompile Include="src\generator\BitSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generator\BuildNFA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generator\BuildCFG.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generator\Generator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\ParseTreeIterator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Parser.h">
+    <ClInclude Include="src\parser\Bootstrap_Lexer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\BitSet.h">
+    <ClInclude Include="src\parser\LexerBase.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ChSet.h">
+    <ClInclude Include="src\parser\Bootstrap_Parser.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Generator.h">
+    <ClInclude Include="src\parser\ParserBase.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Parser_Bootstrap.h">
+    <ClInclude Include="src\generator\BuildBootstrap.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\BuildNFA.h">
+    <ClInclude Include="src\generator\BitSet.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\BuildParser.h">
+    <ClInclude Include="src\generator\BuildNFA.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\generator\ChSet.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LexerTypes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\ParserTypes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\generator\BuildCFG.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\generator\Generator.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\ParseTreeIterator.h" />
   </ItemGroup>
 </Project>

@@ -6,7 +6,28 @@
 //
 // https://github.com/LangsethLars/Parser
 
-#include "Generator.h"
+//#define BOOTSTRAP
+#ifdef BOOTSTRAP
+
+#include "generator/BuildBootstrap.h"
+
+#else
+
+//#define GENERATOR
+#ifdef GENERATOR
+
+#include "generator/Generator.h"
+
+#else
+
+#include "parser/Bootstrap_Lexer.h"
+#include "parser/Bootstrap_Parser.h"
+
+#endif
+
+#endif
+
+#include <stdio.h>
 
 
 
@@ -14,10 +35,28 @@ int main(int argc, char *argv[])
 {
 	bool ok = false;
 
+#ifdef BOOTSTRAP
+
+	BuildBootstrap generator;
+	ok = generator.bootstrapLexerAndParser();
+
+#else
+
+#ifdef GENERATOR
+
 	Generator generator;
-	//ok = generator.bootstrap();
-//	ok = generator.buildTablesFrom("DefaultCFG");
-	ok = generator.buildTablesFrom("PROOF");
+	bool bLexerOnly = false;
+	ok = generator.makeCodeFromScript("Bootstrap", bLexerOnly);
+
+#else
+
+	Bootstrap_Parser parser;
+	ok = parser.lexAndParseFile("scripts/Bootstrap.txt");
+	parser.debug();
+
+#endif
+
+#endif
 
 	if (ok)
 		printf("\nFinished with no errors.\n");

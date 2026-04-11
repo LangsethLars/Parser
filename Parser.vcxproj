@@ -139,22 +139,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\BitSet.cpp" />
-    <ClCompile Include="src\Generator.cpp" />
+    <ClCompile Include="src\generator\BuildCFG.cpp" />
+    <ClCompile Include="src\generator\BitSet.cpp" />
+    <ClCompile Include="src\generator\BuildBootstrap.cpp" />
+    <ClCompile Include="src\generator\BuildNFA.cpp" />
+    <ClCompile Include="src\generator\Generator.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\BuildNFA.cpp" />
-    <ClCompile Include="src\Parser.cpp" />
-    <ClCompile Include="src\BuildParser.cpp" />
-    <ClCompile Include="src\Parser_Bootstrap.cpp" />
+    <ClCompile Include="src\parser\Bootstrap_Lexer.cpp" />
+    <ClCompile Include="src\parser\LexerBase.cpp" />
+    <ClCompile Include="src\parser\Bootstrap_Parser.cpp" />
+    <ClCompile Include="src\parser\ParserBase.cpp" />
+    <ClCompile Include="src\parser\ParseTreeIterator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\BitSet.h" />
-    <ClInclude Include="src\ChSet.h" />
-    <ClInclude Include="src\Generator.h" />
-    <ClInclude Include="src\BuildNFA.h" />
-    <ClInclude Include="src\Parser.h" />
-    <ClInclude Include="src\BuildParser.h" />
-    <ClInclude Include="src\Parser_Bootstrap.h" />
+    <ClInclude Include="src\generator\BuildCFG.h" />
+    <ClInclude Include="src\generator\BitSet.h" />
+    <ClInclude Include="src\generator\BuildBootstrap.h" />
+    <ClInclude Include="src\generator\BuildNFA.h" />
+    <ClInclude Include="src\generator\ChSet.h" />
+    <ClInclude Include="src\generator\Generator.h" />
+    <ClInclude Include="src\parser\Bootstrap_Lexer.h" />
+    <ClInclude Include="src\parser\LexerBase.h" />
+    <ClInclude Include="src\parser\LexerTypes.h" />
+    <ClInclude Include="src\parser\Bootstrap_Parser.h" />
+    <ClInclude Include="src\parser\ParserBase.h" />
+    <ClInclude Include="src\parser\ParserTypes.h" />
+    <ClInclude Include="src\parser\ParseTreeIterator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -94,11 +94,11 @@ This is not considered an inconsistency. It is a meaningful naming pattern for g
 ### Good
 
 - `BuildNFA.cpp`
-- `BuildParseTable.cpp`
+- `BuildBootstrap.cpp`
 - `BitSet.h`
 - `Parser.cpp`
-- `Parser_Bootstrap.cpp`
-- `Parser_Proof.h`
+- `Bootstrap_Parser.cpp`
+- `Proof_Parser.h`
 - `overview.md`
 - `nfa-to-dfa.md`
 
@@ -116,16 +116,11 @@ This is not considered an inconsistency. It is a meaningful naming pattern for g
 
 If additional generated file families are introduced, they should follow the same pattern:
 
-- fixed prefix
+- source-specific prefix
 - underscore
-- source-specific suffix
+- fixed suffix
 
-Example:
-
-- `Lexer_DefaultRE.cpp`
-- `Grammar_Arithmetic.cpp`
-
-Only use this pattern when the file is generated and the suffix identifies its source.
+Only use this pattern when the file is generated and the prefix identifies its source.
 
 ---
 

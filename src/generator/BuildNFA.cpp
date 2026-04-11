@@ -1,6 +1,7 @@
-#include <map>
 #include <cstdlib>
 #include <cstdio>
+#include <fstream>
+#include <sstream>
 
 #include "BuildNFA.h"
 #include "BitSet.h"
@@ -118,9 +119,24 @@ BuildNFA::timesOneOrMore()
 
 
 
-void
-BuildNFA::addToken(BuildNFA &newNFA, int tokenClassId)
+bool
+BuildNFA::addToken(BuildNFA &newNFA, const char* tokenName, bool ignoreToken)
 {
+	// End Of File is hardcoded with id 0 (the first in the list)
+	if (m_TokenClasses.size() <= 0)
+		m_TokenClasses.emplace_back("END_OF_FILE", false);
+
+	// Check that tokenName is not already used
+	for (size_t n = 0; n < m_TokenClasses.size(); ++n) {
+		if (m_TokenClasses[n].name == tokenName) {
+			printf("Error: New token %d with name \"%s\" already exist with id %d\n", m_TokenClasses.size(), tokenName, int(n));
+			return false;
+		}
+	}
+
+	int tokenClassId = int(m_TokenClasses.size());
+	m_TokenClasses.emplace_back(tokenName, ignoreToken);
+
 	// Assume that newNFA is not empty
 	// Append the new states from newNFA and mark the new start state
 	auto it = newNFA.m_States.begin();
@@ -131,12 +147,14 @@ BuildNFA::addToken(BuildNFA &newNFA, int tokenClassId)
 
 	// Add an acepting state at the "end" for the new token
 	m_States.emplace_back(false, tokenClassId, 0, 0, ChSet());
+
+	return true;
 }
 
 
 
 void
-BuildNFA::convertToDFA(LexerTable &lexerTable)
+BuildNFA::convertToDFA()
 {
 	std::map<BitSet, int> nfaStateMap;
 	BitSet nfaStates(m_States.size());
@@ -152,8 +170,8 @@ BuildNFA::convertToDFA(LexerTable &lexerTable)
 	epsilonClosure(nfaStates);
 
 	// Recursively create DFA states from NFA
-	lexerTable.clear();
-	newStateDFA(lexerTable, nfaStates, nfaStateMap);
+	m_LexerTable.clear();
+	newStateDFA(nfaStates, nfaStateMap);
 }
 
 
@@ -188,18 +206,19 @@ BuildNFA::epsilonFollow(BitSet &nfaStates, size_t stateNo)
 
 
 int
-BuildNFA::newStateDFA(LexerTable &lexerTable, BitSet &nfaStates, std::map<BitSet, int> &nfaStateMap)
+BuildNFA::newStateDFA(BitSet &nfaStates, std::map<BitSet, int> &nfaStateMap)
 {
 	// Add new state to the DFA and remember the corresponding BitSet
-	int dfaStateNo = lexerTable.size();
-	lexerTable.emplace_back();
-	lexerTable[dfaStateNo].tokenClassId = getTokenClassId(nfaStates);
+	int dfaStateNo = m_LexerTable.size();
+	m_LexerTable.emplace_back();
+	m_LexerTable[dfaStateNo].tokenClassId = getTokenClassId(nfaStates);
 	nfaStateMap[nfaStates] = dfaStateNo;
 
 	BitSet nextNfaStates(m_States.size());
 
-	for (size_t ch = 0; ch < 256; ++ch) {
+	for (int n = 0; n < 256; ++n) {
 
+		unsigned char ch = (unsigned char)n;
 		nextNfaStates.clear();
 
 		bool isTransitionOut = false; // If there are any moves for this ch
@@ -216,14 +235,14 @@ BuildNFA::newStateDFA(LexerTable &lexerTable, BitSet &nfaStates, std::map<BitSet
 			auto p = nfaStateMap.find(nextNfaStates);
 			if (p != nfaStateMap.end()) {
 				// Move to previous dfa state for this ch
-				lexerTable[dfaStateNo].onChMove[ch] = p->second;
+				m_LexerTable[dfaStateNo].onChMove[ch] = p->second;
 			} else {
 				// Move to new dfa state for this ch by creating a new DFA state
-				lexerTable[dfaStateNo].onChMove[ch] = newStateDFA(lexerTable, nextNfaStates, nfaStateMap);
+				m_LexerTable[dfaStateNo].onChMove[ch] = newStateDFA(nextNfaStates, nfaStateMap);
 			}
 		} else {
 			// No move for this ch
-			lexerTable[dfaStateNo].onChMove[ch] = -1;
+			m_LexerTable[dfaStateNo].onChMove[ch] = -1;
 		}
 
 	}
@@ -250,7 +269,7 @@ BuildNFA::getTokenClassId(BitSet &nfaStates)
 
 
 void
-BuildNFA::debug()
+BuildNFA::debugNFA()
 {
 	printf("\n");
 	printf("NFA used to create DFA\n");
@@ -289,3 +308,120 @@ BuildNFA::debug()
 	}
 }
 
+
+
+bool
+BuildNFA::saveDFA(const char* rootName)
+{
+	int id = 0;
+
+	std::string classNameLexer = rootName;
+	classNameLexer += "_Lexer";
+
+	std::string nsName = "generated/";
+	nsName += classNameLexer;
+
+	std::string hFilename = nsName + ".h";
+	std::string cppFilename = nsName + ".cpp";
+
+	// Build header file content
+	std::ostringstream hFile;
+	hFile << "#pragma once\n";
+	hFile << "\n";
+	hFile << "#include \"LexerBase.h\"\n";
+	hFile << "\n";
+	hFile << "class " << classNameLexer << " : public ::LexerBase {\n";
+	hFile << "\n";
+	hFile << "public:\n";
+	hFile << "\n";
+	hFile << "    " << classNameLexer << "() : ::LexerBase(g_TokenClasses, g_LexerTable) {}\n";
+	hFile << "\n";
+	hFile << "    static const TokenClasses g_TokenClasses;\n";
+	hFile << "    static const LexerTable g_LexerTable;\n";
+
+	// Write TokenId enum
+	id = 0;
+	hFile << "\n";
+	hFile << "    enum class TokenId {\n";
+	for (auto it = m_TokenClasses.begin(); it != m_TokenClasses.end(); ++it, ++id) {
+		hFile << "        " << it->name << " = " << id;
+		if (std::next(it, 1) != m_TokenClasses.end()) {
+			hFile << ",";
+		}
+		hFile << "\n";
+	}
+	hFile << "    }; // End of enum class TokenId\n";
+
+	hFile << "\n";
+	hFile << "}; // End of class " << classNameLexer << "\n";
+
+	// Write header file
+	std::ofstream hOut(hFilename);
+	if (!hOut.is_open()) {
+		printf("Error: Failed to open file '%s' for writing\n", hFilename.c_str());
+		return false;
+	}
+	hOut << hFile.str();
+	if (!hOut.good()) {
+		printf("Error: Failed to write to file '%s'\n", hFilename.c_str());
+		return false;
+	}
+	hOut.close();
+
+	// Build cpp file content
+	std::ostringstream cppFile;
+	cppFile << "#include \"" << classNameLexer << ".h\"\n";
+	cppFile << "\n\n\n";
+
+	// Write TokenClasses array
+	id = 0;
+	cppFile << "const TokenClasses " << classNameLexer << "::g_TokenClasses = {\n";
+	for (auto it = m_TokenClasses.begin(); it != m_TokenClasses.end(); ++it, ++id) {
+		cppFile << "    {\"" << it->name << "\", " << (it->ignore ? "true" : "false") << "}";
+		if (std::next(it, 1) != m_TokenClasses.end()) {
+			cppFile << ",";
+		}
+		cppFile << " // [" << id << "]\n";
+	}
+	cppFile << "}; // End of g_TokenClasses\n";
+	cppFile << "\n\n\n";
+
+	// Write LexerTable array
+	id = 0;
+	cppFile << "const LexerTable " << classNameLexer << "::g_LexerTable = {\n";
+	for (auto it = m_LexerTable.begin(); it != m_LexerTable.end(); ++it, ++id) {
+		cppFile << "    { " << it->tokenClassId << ", // [" << id << "]";
+		if (it->tokenClassId >= 0) {
+			cppFile << " Accepting state for token class " << m_TokenClasses[it->tokenClassId].name;
+		}
+		cppFile << "\n        { ";
+		for (int n = 0; n < 256; ++n) {
+			cppFile << it->onChMove[n];
+			if (n < 255) {
+				cppFile << ", ";
+			}
+		}
+		cppFile << "}\n    }";
+		if (std::next(it, 1) != m_LexerTable.end()) {
+			cppFile << ",";
+		}
+		cppFile << "\n";
+	}
+	cppFile << "}; // End of g_LexerTable\n";
+	cppFile << "\n";
+
+	// Write cpp file
+	std::ofstream cppOut(cppFilename);
+	if (!cppOut.is_open()) {
+		printf("Error: Failed to open file '%s' for writing\n", cppFilename.c_str());
+		return false;
+	}
+	cppOut << cppFile.str();
+	if (!cppOut.good()) {
+		printf("Error: Failed to write to file '%s'\n", cppFilename.c_str());
+		return false;
+	}
+	cppOut.close();
+
+	return true;
+}
