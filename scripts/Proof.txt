@@ -1,0 +1,79 @@
+# Tokens that will be ignored
+# ===========================
+
+Ignore COMMENT = '#' [\01-\FF~\0A\0D]*;
+Ignore SPACE   = [\09\20]+;
+Ignore NL      = '\0A' | '\0D' | "\0D\0A" | "\0A\0D";
+
+# Basic char helpers
+# ==================
+
+Temp  h               = [0-9A-Fa-f];
+Temp  ESC_CH_HEX      = '\\' h h;
+Temp  ESC_CH_G        = '\\' [!"#$%&'()*+,\-./:;<=>?@[\\\]^_'{|}\~];
+Temp  ESC_CH          = ESC_CH_HEX | ESC_CH_G;
+
+Token CONST_STRING = '"' ([\01-\FF~\0A\0D"\\] | ESC_CH)* '"';
+
+# Identifiers
+# ===========
+
+Temp  ALPHA     = [A-Z] | [a-z] | '_';
+Temp  DIGIT     = [0-9];
+Temp  ALPHANUM  = ALPHA | DIGIT;
+
+Token IDENT = ALPHA ALPHANUM*;
+
+# Keywords
+# ========
+
+Token _fun  = "fun";
+Token _Pi   = "Pi";
+Token _Type = "Type";
+
+# Symbols
+# =======
+
+Token OPEN_PAR   = '(';
+Token CLOSE_PAR  = ')';
+Token COLON      = ':';
+Token COMMA      = ',';
+Token FAT_ARROW  = "=>";
+Token SEMICOLON  = ';';
+
+# Grammar written in LL(1)
+# ========================
+
+# <Start> is the main entry point. An invisible temporary rule with a single production will call <Start> like this:
+# Rule <> = <Start> END_OF_FILE;
+
+Skip <Start> = <Decls>;
+
+Skip <Decls> = <Decl> <DeclsLoop>
+             | ;
+
+Skip <DeclsLoop> = SEMICOLON <Decl> <DeclsLoop>
+                 | ;
+
+Rule <Decl> = <Expr>;
+
+Rule <Expr> = <FunExpr>
+            | <PiExpr>
+            | <AppExpr>;
+
+Rule <FunExpr> = _fun IDENT COLON <Expr> FAT_ARROW <Expr>;
+
+Rule <PiExpr> = _Pi IDENT COLON <Expr> COMMA <Expr>;
+
+Rule <AppExpr> = <Atom> <AppLoop>;
+
+Skip <AppLoop> = <AppListTail>
+               | ;
+
+Skip <AppListTail> = <Atom> <AppLoop>;
+
+Skip <Atom> = IDENT
+            | _Type
+            | OPEN_PAR <Expr> CLOSE_PAR;
+
+# End of file

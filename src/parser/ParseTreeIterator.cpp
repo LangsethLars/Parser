@@ -1,5 +1,4 @@
 #include "ParseTreeIterator.h"
-#include "Bootstrap_Parser.h"
 #include <cstdio>
 
 
@@ -103,8 +102,8 @@ int ParseTreeIterator::getTokenIdNoThrow() const {
 int ParseTreeIterator::getVariableIdNoThrow() const {
     if (isValid()) {
         int variableId = -1 - m_ParseTree[m_NodeIndex].symbolIdOrTokenSequenceNo;
-        if (variableId >= 0 && variableId < static_cast<int>(Bootstrap_Parser::g_VariableClasses.size())) {
-            return variableId;
+        if (variableId >= 0) {
+			return variableId; //  Check against g_VariableClasses.size() if needed
         }
     }
     return -1;

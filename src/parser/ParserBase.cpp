@@ -249,9 +249,19 @@ ParserBase::debug()
 				break;
 			while ((n = m_ParseTree[current].next) < 0) {
 				current = m_ParseTree[current].parent;
+				if (current < 0 || current >= int(m_ParseTree.size())) {
+					printf("Error in parse tree structure: Invalid parent index %d\n", current);
+					more = false;
+					break;
+				}
 				--level;
 			}
+			if (!more) break;
 			current = n;
+			if (current < 0 || current >= int(m_ParseTree.size())) {
+				printf("Error in parse tree structure: Invalid next index %d\n", current);
+				more = false;
+			}
 		} else {
 			printf("%s\n", m_VariableClasses[-(m_ParseTree[current].symbolIdOrTokenSequenceNo + 1)].name.c_str());
 			if ((n = m_ParseTree[current].firstChild) < 0) {

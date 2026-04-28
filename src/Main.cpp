@@ -46,12 +46,13 @@ int main(int argc, char *argv[])
 
 	Generator generator;
 	bool bLexerOnly = false;
-	ok = generator.makeCodeFromScript("Bootstrap", bLexerOnly);
+//	ok = generator.makeCodeFromScript("Bootstrap", bLexerOnly);
+	ok = generator.makeCodeFromScript("Proof", bLexerOnly);
 
 #else
 
 	Bootstrap_Parser parser;
-	ok = parser.lexAndParseFile("scripts/Bootstrap.txt");
+	ok = parser.lexAndParseFile("scripts/Proof.txt");
 	parser.debug();
 
 #endif
