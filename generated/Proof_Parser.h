@@ -27,16 +27,27 @@ public:
     enum class VariableId {
         __ = 0,
         _Start_ = 1,
-        _Decls_ = 2,
-        _Decl_ = 3,
-        _DeclsLoop_ = 4,
-        _Expr_ = 5,
-        _FunExpr_ = 6,
-        _PiExpr_ = 7,
-        _AppExpr_ = 8,
-        _Atom_ = 9,
-        _AppLoop_ = 10,
-        _AppListTail_ = 11
+        _Item_ = 2,
+        _Theorem_ = 3,
+        _ParamList_ = 4,
+        _PropExpr_ = 5,
+        _ProofBlock_ = 6,
+        _Param_ = 7,
+        _TypeExpr_ = 8,
+        _BoolExpr_ = 9,
+        _ProofStepList_ = 10,
+        _ProofStep_ = 11,
+        _AssumeStep_ = 12,
+        _HaveStep_ = 13,
+        _ExactStep_ = 14,
+        _ShowStep_ = 15,
+        _CasesStep_ = 16,
+        _ReflStep_ = 17,
+        _TrivialStep_ = 18,
+        _ProofExpr_ = 19,
+        _BoolCaseList_ = 20,
+        _BoolCase_ = 21,
+        _BoolValue_ = 22
     }; // End of enum class VariableId
 
 }; // End of class Proof_Parser

@@ -1,3 +1,13 @@
+# To learn the theory behind finite state machines, regular expressions,
+# grammar and parsers, I made a script language and a Parser project.
+# This can be used to define new languages, tokens and LL(1) grammar,
+# and generate the code for lexing and parsing this new language.
+
+# This file will define a language inspired by Lean, but smaller with
+# less syntactical sugar. Just a bare minimum to be able to verify
+# proofs in mathematics. I want to understand how to make a theorem
+# prover from scratch and write it in simple C++.
+
 # Tokens that will be ignored
 # ===========================
 
@@ -5,75 +15,233 @@ Ignore COMMENT = '#' [\01-\FF~\0A\0D]*;
 Ignore SPACE   = [\09\20]+;
 Ignore NL      = '\0A' | '\0D' | "\0D\0A" | "\0A\0D";
 
-# Basic char helpers
-# ==================
+# Identifiers, always starts with lower case letter
+# =================================================
 
-Temp  h               = [0-9A-Fa-f];
-Temp  ESC_CH_HEX      = '\\' h h;
-Temp  ESC_CH_G        = '\\' [!"#$%&'()*+,\-./:;<=>?@[\\\]^_'{|}\~];
-Temp  ESC_CH          = ESC_CH_HEX | ESC_CH_G;
+Token IDENT = [a-z] [_0-9A-Za-z]*;
 
-Token CONST_STRING = '"' ([\01-\FF~\0A\0D"\\] | ESC_CH)* '"';
+# Keywords, never starts with lower case letter
+# =============================================
 
-# Identifiers
-# ===========
+Token _Bool             = "Bool";
 
-Temp  ALPHA     = [A-Z] | [a-z] | '_';
-Temp  DIGIT     = [0-9];
-Temp  ALPHANUM  = ALPHA | DIGIT;
+Token _Bool_True        = "Bool.True";
+Token _Bool_False       = "Bool.False";
 
-Token IDENT = ALPHA ALPHANUM*;
+Token _Bool_Not         = "Bool.Not";
+Token _Bool_And         = "Bool.And";
+Token _Bool_Or          = "Bool.Or";
 
-# Keywords
-# ========
+Token _Bool_Eq          = "Bool.Eq"; # returns Prop
 
-Token _fun  = "fun";
-Token _Pi   = "Pi";
-Token _Type = "Type";
+Token _Prop             = "Prop";
+
+Token _Prop_True        = "Prop.True";
+Token _Prop_False       = "Prop.False";
+
+Token _Prop_Not         = "Prop.Not";
+Token _Prop_And         = "Prop.And";
+Token _Prop_Or          = "Prop.Or";
+Token _Prop_Implies     = "Prop.Implies";
+Token _Prop_Iff         = "Prop.Iff";
+
+Token _Prop_AndLeft     = "Prop.AndLeft";
+Token _Prop_AndRight    = "Prop.AndRight";
+Token _Prop_AndIntro    = "Prop.AndIntro";
+Token _Prop_OrLeft      = "Prop.OrLeft";
+Token _Prop_OrRight     = "Prop.OrRight";
+Token _Prop_FalseElim   = "Prop.FalseElim";
+
+Token _Theorem          = "Theorem";
+Token _Proof            = "Proof";
+Token _End              = "End";
+Token _Assume           = "Assume";
+Token _Have             = "Have";
+Token _Exact            = "Exact";
+Token _Show             = "Show";
+Token _Cases            = "Cases";
+Token _Case             = "Case";
+Token _Refl             = "Refl";
+Token _Trivial          = "Trivial";
+
+# Wait with the following
+#========================
+
+Token _By           = "By";
+Token _Rewrite      = "Rewrite";
+Token _Symm         = "Symm";
+Token _Trans        = "Trans";
+Token _Reduce       = "Reduce";
+Token _Def          = "Def";
+Token _ForAll       = "ForAll";
+Token _Exists       = "Exists";
+Token _Induction    = "Induction";
+Token _Fun          = "Fun";
+Token _Pi           = "Pi";
+Token _Type         = "Type";
+Token _Nat          = "Nat";
+Token _Int          = "Int";
 
 # Symbols
 # =======
 
-Token OPEN_PAR   = '(';
-Token CLOSE_PAR  = ')';
-Token COLON      = ':';
-Token COMMA      = ',';
-Token FAT_ARROW  = "=>";
-Token SEMICOLON  = ';';
+Token EQUAL         = '=';
+Token OPEN_PAR      = '(';
+Token CLOSE_PAR     = ')';
+Token COLON         = ':';
+Token COLONEQUAL    = ":=";
+Token COMMA         = ',';
+Token DOT           = '.';
+Token SLIM_ARROW    = "->";
+Token FAT_ARROW     = "=>";
+Token SEMICOLON     = ';';
 
 # Grammar written in LL(1)
 # ========================
 
-# <Start> is the main entry point. An invisible temporary rule with a single production will call <Start> like this:
+# To avoid name collitions, I use ('<' alphanum* '>') for symbols, while
+# tokens are (alphanum*). General tokens are UPPERCASE while fixed keywords
+# are prefixed with _ followed by the keyword (if legal).
+# That makes it easier to read as well.
+
+# <Start> is the main entry point. An invisible temporary rule
+# with a single production will call <Start> like this:
 # Rule <> = <Start> END_OF_FILE;
 
-Skip <Start> = <Decls>;
+Skip <Start>
+    = <Item>;
 
-Skip <Decls> = <Decl> <DeclsLoop>
-             | ;
+Skip <Item>
+    = <Theorem> <Item>
+    | ;
 
-Skip <DeclsLoop> = SEMICOLON <Decl> <DeclsLoop>
-                 | ;
+Rule <Theorem>
+    = _Theorem IDENT <ParamList> COLON <PropExpr> <ProofBlock>;
 
-Rule <Decl> = <Expr>;
+Rule <ParamList>
+    = <Param> <ParamList>
+    | ;
 
-Rule <Expr> = <FunExpr>
-            | <PiExpr>
-            | <AppExpr>;
+Rule <Param>
+    = OPEN_PAR IDENT COLON <TypeExpr> CLOSE_PAR;
 
-Rule <FunExpr> = _fun IDENT COLON <Expr> FAT_ARROW <Expr>;
+Skip <TypeExpr>
+    = _Bool
+    | _Prop;
 
-Rule <PiExpr> = _Pi IDENT COLON <Expr> COMMA <Expr>;
+Rule <PropExpr>
+    = IDENT
+    | _Prop_True
+    | _Prop_False
+    | _Prop_Not     OPEN_PAR <PropExpr> CLOSE_PAR
+    | _Prop_And     OPEN_PAR <PropExpr> <PropExpr> CLOSE_PAR
+    | _Prop_Or      OPEN_PAR <PropExpr> <PropExpr> CLOSE_PAR
+    | _Prop_Implies OPEN_PAR <PropExpr> <PropExpr> CLOSE_PAR
+    | _Prop_Iff     OPEN_PAR <PropExpr> <PropExpr> CLOSE_PAR
+    | _Bool_Eq      OPEN_PAR <BoolExpr> <BoolExpr> CLOSE_PAR;
 
-Rule <AppExpr> = <Atom> <AppLoop>;
+Rule <BoolExpr>
+    = IDENT
+    | _Bool_True
+    | _Bool_False
+    | _Bool_Not   OPEN_PAR <BoolExpr> CLOSE_PAR
+    | _Bool_And   OPEN_PAR <BoolExpr> <BoolExpr> CLOSE_PAR
+    | _Bool_Or    OPEN_PAR <BoolExpr> <BoolExpr> CLOSE_PAR;
 
-Skip <AppLoop> = <AppListTail>
-               | ;
+Rule <ProofBlock>
+    = _Proof <ProofStepList> _End;
 
-Skip <AppListTail> = <Atom> <AppLoop>;
+Skip <ProofStepList>
+    = <ProofStep> <ProofStepList>
+    | ;
 
-Skip <Atom> = IDENT
-            | _Type
-            | OPEN_PAR <Expr> CLOSE_PAR;
+Skip <ProofStep>
+    = <AssumeStep>
+    | <HaveStep>
+    | <ExactStep>
+    | <ShowStep>
+    | <CasesStep>
+    | <ReflStep>
+    | <TrivialStep>;
+
+Rule <AssumeStep>
+    = _Assume IDENT COLON <PropExpr>;
+
+Rule <HaveStep>
+    = _Have IDENT COLON <PropExpr> COLONEQUAL <ProofExpr>;
+
+Rule <ExactStep>
+    = _Exact <ProofExpr>;
+
+Rule <ShowStep>
+    = _Show <PropExpr>;
+
+Rule <ReflStep>
+    = _Refl;
+
+Rule <TrivialStep>
+    = _Trivial;
+
+Rule <CasesStep>
+    = _Cases IDENT <BoolCaseList> _End;
+
+Rule <BoolCaseList>
+    = <BoolCase> <BoolCase>;
+
+Rule <BoolCase>
+    = _Case <BoolValue> FAT_ARROW <ProofStepList>;
+
+# <ProofStepList> ends naturally when the parser meets _Case or _End,
+# because _Case and _End is not the start on <ProofStep>.
+
+Rule <BoolValue>
+    = _Bool_False
+    | _Bool_True;
+
+Rule <ProofExpr>
+    = IDENT
+    | _Refl
+    | _Trivial
+    | _Prop_FalseElim OPEN_PAR <PropExpr>  <ProofExpr> CLOSE_PAR
+    | _Prop_AndLeft   OPEN_PAR <ProofExpr>             CLOSE_PAR
+    | _Prop_AndRight  OPEN_PAR <ProofExpr>             CLOSE_PAR
+    | _Prop_AndIntro  OPEN_PAR <ProofExpr> <ProofExpr> CLOSE_PAR
+    | _Prop_OrLeft    OPEN_PAR <PropExpr>  <ProofExpr> CLOSE_PAR
+    | _Prop_OrRight   OPEN_PAR <PropExpr>  <ProofExpr> CLOSE_PAR;
+
+# Proof checking model
+# ====================
+#
+# The proof checker maintains:
+#
+# - A context of variables:
+#     x : Bool
+#     p : Prop
+#
+# - A context of proof assumptions:
+#     h : p
+#     hpq : Prop.And(p q)
+#
+# - A current goal:
+#     goal : PropExpr
+#
+# Each ProofStep either:
+# - modifies the current goal and context, or
+# - adds a proof assumption, or
+# - closes the current goal.
+#
+# First implemented steps:
+#
+# Trivial:
+#   closes goal Prop.True.
+#
+# Refl:
+#   closes goal Bool.Eq(a b) if normalizeBool(a) == normalizeBool(b).
+#
+# Cases x:
+#   requires x : Bool.
+#   creates two subgoals:
+#     goal[x := Bool.False]
+#     goal[x := Bool.True]
 
 # End of file
