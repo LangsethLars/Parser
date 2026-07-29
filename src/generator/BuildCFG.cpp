@@ -120,7 +120,7 @@ bool BuildCFG::buildParseTable()
 					)
 			) {
 				if (m_ParsingTable[iTable] < 0) {
-					m_ParsingTable[iTable] = iProduction;
+					m_ParsingTable[iTable] = int(iProduction);
 				}
 				else if (m_ParsingTable[iTable] != iProduction) {
 					printf("Error in production %d for terminal %d first\n", int(iProduction), int(iTerminal));

@@ -27,8 +27,8 @@ bool ParserBase::parseTokenSequence()
 
 	m_ParseTree.clear();
 
-	int nOfVar = m_VariableClasses.size();
-	int nOfTok = m_TokenClasses.size();
+	int nOfVar = int(m_VariableClasses.size());
+	int nOfTok = int(m_TokenClasses.size());
 
 	int tokenNo = 0;
 	int tokenId;

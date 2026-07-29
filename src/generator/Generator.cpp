@@ -2,6 +2,7 @@
 #include "ChSet.h"
 
 #include <iterator>
+#include <iostream>
 
 
 
@@ -9,6 +10,9 @@ bool Generator::makeCodeFromScript(const char *rootName, bool bOnlyLexer)
 {
 	clear();
 	std::string filename = "scripts/" + std::string(rootName) + ".txt";
+
+	std::cout << "Making " << rootName << "_classes from file " << filename << std::endl;
+
 	bool ok = m_Parser.lexAndParseFile(filename.c_str());
 
 	if (ok) {
@@ -177,13 +181,13 @@ void Generator::getTokenExpr(ParseTreeIterator it, ParseTreeIterator itLast, Bui
 			} else if (token.tokenClassId == int(Bootstrap_Lexer::TokenId::CONST_CH)) {
 
 				// CONST_CH
-				int i = token.lexemeStart + 1;
+				int i = int(token.lexemeStart) + 1;
 				nfaTemp.appendCh(getChar(i));
 
 			} else if (token.tokenClassId == int(Bootstrap_Lexer::TokenId::CONST_STRING)) {
 
 				// CONST_STRING
-				int i = token.lexemeStart + 1;
+				int i = int(token.lexemeStart) + 1;
 				for (; m_Parser.m_RawText[i] != '"';) {
 					nfaTemp.appendCh(getChar(i)); // i will be increased
 				}
@@ -193,7 +197,7 @@ void Generator::getTokenExpr(ParseTreeIterator it, ParseTreeIterator itLast, Bui
 				// CONST_SET
 				ChSet chSet;
 				unsigned char ch1, ch2;
-				int i = token.lexemeStart + 1;
+				int i = int(token.lexemeStart) + 1;
 				for (; m_Parser.m_RawText[i] != ']' && m_Parser.m_RawText[i] != '~';) {
 					ch1 = getChar(i);
 					if (m_Parser.m_RawText[i] == '-') {

@@ -59,9 +59,9 @@ BuildNFA::this_or(BuildNFA &rhsNFA)
 	int end = int(m_States.size());
 	for (auto it = m_States.begin(); it != m_States.end(); ++it, --end) {
 		if (it->move == end)
-			it->move += rhsNFA.m_States.size();
+			it->move += int(rhsNFA.m_States.size());
 		if (it->epsilonMove == end)
-			it->epsilonMove += rhsNFA.m_States.size();
+			it->epsilonMove += int(rhsNFA.m_States.size());
 	}
 
 	// Add an epsilon state at the "beginning"
@@ -129,7 +129,7 @@ BuildNFA::addToken(BuildNFA &newNFA, const char* tokenName, bool ignoreToken)
 	// Check that tokenName is not already used
 	for (size_t n = 0; n < m_TokenClasses.size(); ++n) {
 		if (m_TokenClasses[n].name == tokenName) {
-			printf("Error: New token %d with name \"%s\" already exist with id %d\n", m_TokenClasses.size(), tokenName, int(n));
+			printf("Error: New token %d with name \"%s\" already exist with id %d\n", int(m_TokenClasses.size()), tokenName, int(n));
 			return false;
 		}
 	}
@@ -209,7 +209,7 @@ int
 BuildNFA::newStateDFA(BitSet &nfaStates, std::map<BitSet, int> &nfaStateMap)
 {
 	// Add new state to the DFA and remember the corresponding BitSet
-	int dfaStateNo = m_LexerTable.size();
+	int dfaStateNo = int(m_LexerTable.size());
 	m_LexerTable.emplace_back();
 	m_LexerTable[dfaStateNo].tokenClassId = getTokenClassId(nfaStates);
 	nfaStateMap[nfaStates] = dfaStateNo;

@@ -1,6 +1,6 @@
 # Parser
 
-A simple project for generating lexer and LL(1) parser tables from a textual grammar specification.
+A simple project for generating lexer and LL(1) parser tables from a textual grammar specification. First version started May 16, 2018.
 
 The project is part of a larger goal: building a system for parsing and verifying mathematical proofs written in a formal language.
 

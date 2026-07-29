@@ -9,30 +9,20 @@
 # prover from scratch and write it in simple C++.
 
 # Tokens that will be ignored
-# ===========================
+# ---------------------------
 
 Ignore COMMENT = '#' [\01-\FF~\0A\0D]*;
 Ignore SPACE   = [\09\20]+;
 Ignore NL      = '\0A' | '\0D' | "\0D\0A" | "\0A\0D";
 
 # Identifiers, always starts with lower case letter
-# =================================================
+# -------------------------------------------------
 
-Token IDENT = [a-z] [_0-9A-Za-z]*;
+Token IDENT    = [a-z] [_0-9A-Za-z]*;
+Token NUMBER   = ('0' | [1-9][0-9]*) '-'?;
 
 # Keywords, never starts with lower case letter
-# =============================================
-
-Token _Bool             = "Bool";
-
-Token _Bool_True        = "Bool.True";
-Token _Bool_False       = "Bool.False";
-
-Token _Bool_Not         = "Bool.Not";
-Token _Bool_And         = "Bool.And";
-Token _Bool_Or          = "Bool.Or";
-
-Token _Bool_Eq          = "Bool.Eq"; # returns Prop
+# ---------------------------------------------
 
 Token _Prop             = "Prop";
 
@@ -52,6 +42,8 @@ Token _Prop_OrLeft      = "Prop.OrLeft";
 Token _Prop_OrRight     = "Prop.OrRight";
 Token _Prop_FalseElim   = "Prop.FalseElim";
 
+Token _Prop_Eq          = "Prop.Eq";        # Eq(a b) returns Prop and is meant to be overloaded for different types, e.g. myNat
+
 Token _Theorem          = "Theorem";
 Token _Proof            = "Proof";
 Token _End              = "End";
@@ -59,10 +51,16 @@ Token _Assume           = "Assume";
 Token _Have             = "Have";
 Token _Exact            = "Exact";
 Token _Show             = "Show";
-Token _Cases            = "Cases";
-Token _Case             = "Case";
+#Token _Cases            = "Cases";
 Token _Refl             = "Refl";
 Token _Trivial          = "Trivial";
+
+Token _Inductive        = "Inductive";
+Token _Type             = "Type";
+
+Token _Def              = "Def";
+Token _Match            = "Match";
+Token _Case             = "Case";
 
 # Wait with the following
 #========================
@@ -72,15 +70,12 @@ Token _Rewrite      = "Rewrite";
 Token _Symm         = "Symm";
 Token _Trans        = "Trans";
 Token _Reduce       = "Reduce";
-Token _Def          = "Def";
 Token _ForAll       = "ForAll";
 Token _Exists       = "Exists";
 Token _Induction    = "Induction";
 Token _Fun          = "Fun";
 Token _Pi           = "Pi";
-Token _Type         = "Type";
 Token _Nat          = "Nat";
-Token _Int          = "Int";
 
 # Symbols
 # =======
@@ -95,6 +90,7 @@ Token DOT           = '.';
 Token SLIM_ARROW    = "->";
 Token FAT_ARROW     = "=>";
 Token SEMICOLON     = ';';
+Token PIPE          = '|';
 
 # Grammar written in LL(1)
 # ========================
@@ -113,21 +109,49 @@ Skip <Start>
 
 Skip <Item>
     = <Theorem> <Item>
+    | <Inductive> <Item>
+    | <Def> <Item>
     | ;
 
-Rule <Theorem>
-    = _Theorem IDENT <ParamList> COLON <PropExpr> <ProofBlock>;
+# Some common rules that will be used in multiple places
+# ---------------------------------------------------------------------
 
-Rule <ParamList>
+# Parameters for theorems and definitions, e.g. (p : Prop) (n : myNat)
+
+Skip <ParamList>
     = <Param> <ParamList>
     | ;
 
 Rule <Param>
-    = OPEN_PAR IDENT COLON <TypeExpr> CLOSE_PAR;
+    = OPEN_PAR IDENT COLON <Sort> CLOSE_PAR;
 
-Skip <TypeExpr>
-    = _Bool
+Skip <Sort>
+    = <TypeExpr>
     | _Prop;
+
+Rule <TypeExpr>
+    = _Type
+    | IDENT
+    | OPEN_PAR <TypeExpr> SLIM_ARROW <TypeExpr> CLOSE_PAR;
+
+# Arguments for functions and constructors, e.g. n1 or mySucc(myAdd(n1 n3))
+
+Rule <ArgExpr>
+    = IDENT <ArgList>;
+
+Skip <ArgList>
+    = OPEN_PAR <Args> CLOSE_PAR
+    | ;
+
+Skip <Args>
+    = <ArgExpr> <Args>
+    | ;
+
+# Theorem
+# ---------------------------------------------------------------------
+
+Rule <Theorem>
+    = _Theorem IDENT <ParamList> COLON <PropExpr> <ProofBlock>;
 
 Rule <PropExpr>
     = IDENT
@@ -138,15 +162,7 @@ Rule <PropExpr>
     | _Prop_Or      OPEN_PAR <PropExpr> <PropExpr> CLOSE_PAR
     | _Prop_Implies OPEN_PAR <PropExpr> <PropExpr> CLOSE_PAR
     | _Prop_Iff     OPEN_PAR <PropExpr> <PropExpr> CLOSE_PAR
-    | _Bool_Eq      OPEN_PAR <BoolExpr> <BoolExpr> CLOSE_PAR;
-
-Rule <BoolExpr>
-    = IDENT
-    | _Bool_True
-    | _Bool_False
-    | _Bool_Not   OPEN_PAR <BoolExpr> CLOSE_PAR
-    | _Bool_And   OPEN_PAR <BoolExpr> <BoolExpr> CLOSE_PAR
-    | _Bool_Or    OPEN_PAR <BoolExpr> <BoolExpr> CLOSE_PAR;
+    | _Prop_Eq      OPEN_PAR <ArgExpr>  <ArgExpr>  CLOSE_PAR;
 
 Rule <ProofBlock>
     = _Proof <ProofStepList> _End;
@@ -182,22 +198,6 @@ Rule <ReflStep>
 Rule <TrivialStep>
     = _Trivial;
 
-Rule <CasesStep>
-    = _Cases IDENT <BoolCaseList> _End;
-
-Rule <BoolCaseList>
-    = <BoolCase> <BoolCase>;
-
-Rule <BoolCase>
-    = _Case <BoolValue> FAT_ARROW <ProofStepList>;
-
-# <ProofStepList> ends naturally when the parser meets _Case or _End,
-# because _Case and _End is not the start on <ProofStep>.
-
-Rule <BoolValue>
-    = _Bool_False
-    | _Bool_True;
-
 Rule <ProofExpr>
     = IDENT
     | _Refl
@@ -209,13 +209,51 @@ Rule <ProofExpr>
     | _Prop_OrLeft    OPEN_PAR <PropExpr>  <ProofExpr> CLOSE_PAR
     | _Prop_OrRight   OPEN_PAR <PropExpr>  <ProofExpr> CLOSE_PAR;
 
+# Inductive myNat : Type | myZero : myNat | mySucc : myNat -> myNat End
+# ---------------------------------------------------------------------
+
+Rule <Inductive>
+    = _Inductive IDENT COLON _Type <ConstructorList> _End;
+
+Skip <ConstructorList>
+    = <Constructor> <ConstructorList>
+    | ;
+
+Rule <Constructor>
+    = PIPE IDENT COLON <TypeExpr>;
+
+# Def myAdd (n1 : myNat) (n2 : myNat) : myNat := ... End
+# ---------------------------------------------------------------------
+
+Rule <Def>
+    = _Def IDENT <ParamList> COLON <TypeExpr> COLONEQUAL <DefExpr> _End;
+
+Skip <DefExpr>
+    = <MatchExpr>;
+
+# Match n2
+#    Case myZero =>
+#        n1
+#    Case mySucc(n3) =>
+#       mySucc(myAdd(n1 n3))
+# End
+
+Rule <MatchExpr>
+    = _Match IDENT <CaseList> _End;
+
+Skip <CaseList>
+        = _Case <ArgExpr> FAT_ARROW <ArgExpr> <CaseList>
+        | ;
+
+# ---------------------------------------------------------------------
+
 # Proof checking model
 # ====================
 #
 # The proof checker maintains:
 #
 # - A context of variables:
-#     x : Bool
+#     x : myNat
 #     p : Prop
 #
 # - A context of proof assumptions:
@@ -230,18 +268,6 @@ Rule <ProofExpr>
 # - adds a proof assumption, or
 # - closes the current goal.
 #
-# First implemented steps:
-#
-# Trivial:
-#   closes goal Prop.True.
-#
-# Refl:
-#   closes goal Bool.Eq(a b) if normalizeBool(a) == normalizeBool(b).
-#
-# Cases x:
-#   requires x : Bool.
-#   creates two subgoals:
-#     goal[x := Bool.False]
-#     goal[x := Bool.True]
+# See Examples.txt for implemented steps.
 
 # End of file
