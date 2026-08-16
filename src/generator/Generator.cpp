@@ -14,6 +14,7 @@ bool Generator::makeCodeFromScript(const char *rootName, bool bOnlyLexer)
 	std::cout << "Making " << rootName << "_classes from file " << filename << std::endl;
 
 	bool ok = m_Parser.lexAndParseFile(filename.c_str());
+//	m_Parser.debug();
 
 	if (ok) {
 		ok = buildLexer(rootName);
